@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
-import { buildWhatsAppUrl } from "@/lib/whatsapp";
+import { buildOrderMessage } from "@/lib/whatsapp";
+import WhatsAppAction from "./WhatsAppAction";
 import { freeDeliveryThreshold } from "@/lib/config";
 import ProductImage from "./ProductImage";
 import QuantityStepper from "./QuantityStepper";
@@ -195,15 +196,13 @@ export default function CartView() {
               <Link href="/checkout" className="btn-primary w-full">
                 Proceed to checkout
               </Link>
-              <a
-                href={buildWhatsAppUrl({
+              <WhatsAppAction
+                message={buildOrderMessage({
                   items,
                   subtotal,
                   delivery,
                   total,
                 })}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="flex w-full items-center justify-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/[0.07] px-7 py-3 text-sm font-medium text-emerald-200 transition hover:border-emerald-400/50 hover:bg-emerald-400/[0.12]"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -211,7 +210,7 @@ export default function CartView() {
                   <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.84 9.84 0 0 0 12.04 2Zm0 18.15a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.12.82.83-3.04-.19-.31a8.19 8.19 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.17 8.17 0 0 1 2.41 5.83c-.01 4.54-3.71 8.23-8.25 8.23Z" />
                 </svg>
                 Order on WhatsApp
-              </a>
+              </WhatsAppAction>
             </div>
 
             <p className="mt-5 text-[11px] leading-relaxed text-ink-500">

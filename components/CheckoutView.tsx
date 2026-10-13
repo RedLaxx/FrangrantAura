@@ -5,11 +5,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
-import { buildWhatsAppUrl, type WhatsAppOrder } from "@/lib/whatsapp";
+import {
+  buildOrderMessage,
+  whatsAppHref,
+  type WhatsAppOrder,
+} from "@/lib/whatsapp";
 import { generateReference, payWithPaystack } from "@/lib/paystack";
 import {
   isPaystackConfigured,
   isTestMode,
+  isWhatsAppConfigured,
   siteConfig,
 } from "@/lib/config";
 import type { CheckoutDetails } from "@/lib/types";
@@ -122,13 +127,13 @@ export default function CheckoutView() {
         },
         onSuccess: (paidReference) => {
           const finalRef = paidReference || ref;
+          // Only the reference travels in the URL. The confirmation page
+          // re-checks the amount straight from Paystack, so a tampered URL
+          // cannot turn into a fake receipt.
           const params = new URLSearchParams({
             ref: finalRef,
             method: "paystack",
-            amount: String(total),
-            name: details.fullName.trim(),
-            email: details.email.trim(),
-            city: details.city.trim(),
+            name: details.fullName.trim().slice(0, 60),
           });
           clear();
           router.push(`/checkout/confirmation?${params.toString()}`);
@@ -149,9 +154,19 @@ export default function CheckoutView() {
 
   const handleWhatsApp = () => {
     if (!validate()) return;
+
     const ref = reference ?? generateReference();
+    const url = whatsAppHref(buildOrderMessage(buildOrder(ref)));
+
+    if (!url) {
+      setStatus("error");
+      setMessage(
+        "WhatsApp ordering isn't set up yet. Add NEXT_PUBLIC_WHATSAPP_NUMBER to .env.local — or pay by card above.",
+      );
+      return;
+    }
+
     setReference(ref);
-    const url = buildWhatsAppUrl(buildOrder(ref));
     window.open(url, "_blank", "noopener,noreferrer");
     setStatus("whatsapp-sent");
   };
@@ -305,9 +320,13 @@ export default function CheckoutView() {
 
             <PaymentOption
               title="Order on WhatsApp"
-              subtitle="We'll confirm stock and delivery, then share payment details"
+              subtitle={
+                isWhatsAppConfigured
+                  ? "We'll confirm stock and delivery, then share payment details"
+                  : "Unavailable — add NEXT_PUBLIC_WHATSAPP_NUMBER to enable WhatsApp orders"
+              }
               onClick={handleWhatsApp}
-              disabled={status === "processing"}
+              disabled={status === "processing" || !isWhatsAppConfigured}
               accent="whatsapp"
             />
           </div>

@@ -4,6 +4,7 @@ import { CartProvider } from "@/lib/cart";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import CartDrawer from "@/components/CartDrawer";
+import SetupBanner from "@/components/SetupBanner";
 import { siteConfig } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -66,6 +67,7 @@ export default function RootLayout({
           >
             Skip to content
           </a>
+          <SetupBanner />
           <SiteHeader />
           <main id="main">{children}</main>
           <SiteFooter />
