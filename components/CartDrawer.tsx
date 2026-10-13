@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
-import { buildWhatsAppUrl } from "@/lib/whatsapp";
+import { buildOrderMessage } from "@/lib/whatsapp";
+import WhatsAppAction from "./WhatsAppAction";
 import { freeDeliveryThreshold } from "@/lib/config";
 import ProductImage from "./ProductImage";
 import QuantityStepper from "./QuantityStepper";
@@ -208,19 +209,17 @@ export default function CartDrawer() {
                 >
                   View cart
                 </Link>
-                <a
-                  href={buildWhatsAppUrl({
+                <WhatsAppAction
+                  message={buildOrderMessage({
                     items,
                     subtotal,
                     delivery: 0,
                     total: subtotal,
                   })}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="btn-ghost w-full border border-white/10 py-3 text-sm"
                 >
                   Order on WhatsApp
-                </a>
+                </WhatsAppAction>
               </div>
             </footer>
           </>

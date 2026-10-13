@@ -44,19 +44,50 @@ one place — `lib/config.ts`:
 | Variable | Purpose |
 | --- | --- |
 | `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Paystack **public** key. Starts with `pk_test_` or `pk_live_`. |
+| `PAYSTACK_SECRET_KEY` | Paystack **secret** key. Server-side only — verifies payments before the receipt claims success. |
 | `NEXT_PUBLIC_STORE_CURRENCY` | Charge currency. Defaults to `NGN`. |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | WhatsApp number in international format, digits only (`2348012345678`). |
 | `NEXT_PUBLIC_STORE_NAME` | Shop name used across the UI and checkout. |
 | `NEXT_PUBLIC_STORE_EMAIL` | Contact email. |
 | `NEXT_PUBLIC_SITE_URL` | Deployed URL, used for canonical links and the sitemap. |
+| `NEXT_PUBLIC_STORE_ADDRESS` | Studio address shown on the contact page and footer. |
+| `NEXT_PUBLIC_STORE_HOURS` | Opening hours shown alongside the address. |
 
-> **Never** put your Paystack *secret* key in this repo. It is only needed if
-> you later add server-side payment verification.
+> **Never** commit `PAYSTACK_SECRET_KEY`, and never give it a
+> `NEXT_PUBLIC_` prefix — that would ship it to the browser. It is read in
+> exactly one place, `lib/paystack-server.ts`, which only server components
+> and route handlers may import.
 
-While `pk_test_…` is in use, the checkout page shows a **Test mode** banner and
+### Missing configuration is loud, not silent
+
+The site ships with nothing configured, and it says so. An amber banner across
+the top of every page lists what is missing until you set it, WhatsApp buttons
+render **disabled** rather than pointing at the placeholder number, and the
+checkout will not start a card payment without a real key. Set the env vars and
+every one of those behaviours disappears on its own — no code change.
+
+Placeholder values are detected on purpose: the example number
+`2348012345678` and any key containing `xxxx` are treated as *not configured*,
+so a copied-but-forgotten example can't go live by accident.
+
+While `pk_test_…` is in use, a **Test mode** notice appears site-wide and
 Paystack's test card (`4084 0840 8408 4081`, any future expiry, any CVV) runs a
 full payment without moving real money. Swap in your `pk_live_` key and the
-banner disappears — no code changes.
+notice disappears — no code changes.
+
+Payment confirmation happens **on the server**. After the Paystack popup closes,
+the confirmation page asks Paystack directly whether that reference was paid and
+prints the amount *from Paystack's answer* — the amount is never taken from the
+URL. So:
+
+- nothing that shows "payment received" can be faked by editing the address bar;
+- if Paystack hasn't settled the payment yet, the page says so and links to a
+  re-check rather than claiming success;
+- without `PAYSTACK_SECRET_KEY` it prints "awaiting confirmation" instead of a
+  receipt, and logs nothing sensitive.
+
+Compare this with a client-only integration, where the browser tells the shop
+"it worked" and the shop has to take its word for it.
 
 Delivery is a flat **₦3,500**, and becomes free at **₦150,000**. Both values are
 constants at the top of `lib/config.ts`.
@@ -96,12 +127,17 @@ products. The brand page, filter list, sitemap and footer update on their own.
 1. Push the repo to GitHub.
 2. Import it at [vercel.com/new](https://vercel.com/new) — Vercel detects
    Next.js and needs no build configuration.
-3. Add the same environment variables from `.env.local` under
-   **Settings → Environment Variables**.
+3. Add every environment variable from `.env.local` under
+   **Settings → Environment Variables** — including `PAYSTACK_SECRET_KEY`
+   (leave it out of the "Production" checkbox only if you never want the
+   server to confirm payments).
 4. Deploy.
 
 It also runs anywhere that supports Node (`npm run build && npm start`) — no
 platform-specific config is required.
+
+Before you announce the site, walk [LAUNCH.md](./LAUNCH.md) — it is the
+shortest path from "deployed" to "safe to take money".
 
 ---
 
@@ -116,12 +152,15 @@ app/                  Routes (App Router)
   cart/ checkout/     Cart, checkout, confirmation
   about/ contact/     Story, FAQs, contact
 components/           UI: header, cart drawer, filters, cards, panels
+  WhatsAppAction.tsx  WhatsApp CTA that disables itself when unconfigured
+  SetupBanner.tsx     Launch preflight banner (env vars still missing)
 lib/
   products.ts         ← the catalogue (edit this)
-  config.ts           ← store settings, fees, price buckets
+  config.ts           ← store settings, fees, price buckets, config checks
   filters.ts          Filtering, sorting, URL param parsing
   cart.tsx            Cart state (React context + localStorage)
-  paystack.ts         Paystack inline checkout
+  paystack.ts         Paystack inline checkout (browser)
+  paystack-server.ts  Server-only payment verification (never import client-side)
   whatsapp.ts         wa.me deep links with formatted orders
   format.ts           Naira formatting
   types.ts            Domain types

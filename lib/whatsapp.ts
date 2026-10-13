@@ -1,4 +1,8 @@
-import { siteConfig, whatsappNumber } from "./config";
+import {
+  isWhatsAppConfigured,
+  siteConfig,
+  whatsappDigits,
+} from "./config";
 import { formatPrice } from "./format";
 import type { CheckoutDetails, Product } from "./types";
 
@@ -16,14 +20,30 @@ export interface WhatsAppOrder {
   reference?: string;
 }
 
-/** Builds a wa.me deep link carrying a fully formatted order message. */
-export function buildWhatsAppUrl(
-  order: WhatsAppOrder,
-  options: { number?: string; intro?: string } = {},
-): string {
-  const message = buildOrderMessage(order, options.intro);
-  const number = (options.number ?? whatsappNumber).replace(/\D/g, "");
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+/**
+ * The one place a `wa.me` URL is assembled.
+ *
+ * @param message  Optional pre-filled message.
+ * @param number   Override; defaults to the configured store number.
+ * @returns A wa.me URL, or `null` if no usable number is configured.
+ */
+export function whatsAppHref(
+  message?: string,
+  number: string = whatsappDigits,
+): string | null {
+  const digits = number.replace(/\D/g, "");
+
+  // Respect an explicit override (e.g. a per-brand number) but never emit a
+  // link for the store-wide placeholder.
+  if (digits !== whatsappDigits && /^\d{8,15}$/.test(digits)) {
+    const base = `https://wa.me/${digits}`;
+    return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+  }
+
+  if (!isWhatsAppConfigured) return null;
+
+  const base = `https://wa.me/${whatsappDigits}`;
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
 /** Plain-text order summary sent to WhatsApp. */
@@ -72,9 +92,9 @@ export function buildOrderMessage(
   return lines.join("\n");
 }
 
-/** A lighter link used for single-product "ask about this" buttons. */
-export function buildProductEnquiryUrl(product: Product): string {
-  const message = [
+/** Message used by single-product "ask about this" buttons. */
+export function productEnquiryMessage(product: Product): string {
+  return [
     `Hello ${siteConfig.name}! I'd like to order this fragrance.`,
     "",
     `${product.name} — ${product.sizeMl}ml ${product.concentration}`,
@@ -83,6 +103,4 @@ export function buildProductEnquiryUrl(product: Product): string {
     "",
     "Is this in stock?",
   ].join("\n");
-
-  return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 }
