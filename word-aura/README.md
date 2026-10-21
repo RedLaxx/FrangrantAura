@@ -88,16 +88,55 @@ npx cap sync android
 cd android && ./gradlew assembleDebug   # app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Requires JDK 21 and the Android SDK (compileSdk 34).
+Requires JDK 17+ and the Android SDK (compileSdk 35, AGP 8.7, Gradle 8.9).
+
+### Get an installable APK without a build machine
+
+Every push to `main` or an `arena/**` branch builds, signs and publishes the app. The finished
+files live on the **`word-aura-builds`** branch, which only ever holds the latest build:
+
+```bash
+git fetch origin word-aura-builds:word-aura-builds
+git show word-aura-builds:word-aura-release.apk > word-aura-release.apk
+```
+
+| File | Use |
+| --- | --- |
+| `word-aura-release.apk` | Signed release build — copy to a phone and install |
+| `word-aura-debug.apk` | Debug build, handy for quick tests |
+| `word-aura-release.aab` | Upload this to Google Play |
+| `SHA256SUMS.txt` | Checksums to verify the download |
+
+The same files are also attached to the workflow run as the `word-aura-apk` artifact.
+
+### Signing
+
+Android only accepts updates signed with the **same key**, so the key matters more than any
+single build.
+
+- **With secrets configured** (see table below) the workflow signs with your keystore. This is
+  what you want for Play releases.
+- **With no secrets** the workflow mints a 4096-bit RSA self-signed key, signs the release build
+  with it, verifies the result with `apksigner`, and uploads both the keystore and its password as
+  the `word-aura-signing-key` artifact. Download that artifact once, keep it offline, and add
+  `ANDROID_KEYSTORE_BASE64`/`ANDROID_KEYSTORE_PASSWORD`/`ANDROID_KEY_ALIAS`/`ANDROID_KEY_PASSWORD`
+  as repository secrets so later builds keep the same identity. If you lose it you can still ship
+  builds, but Play will treat them as a different app.
+
+Current build facts (first successful CI run): `com.wordaura.game`, minSdk 22, targetSdk 35,
+release APK ~3.1 MB, signed with a v1+v2/v3 signature.
 
 ### Build in CI
 
 `.github/workflows/android.yml` runs on every push and pull request that touches `word-aura/`:
 
-1. `npm run validate`, `npm test`, `npm run build`
-2. `gradlew assembleDebug` → downloadable artifact (`word-aura-debug-apk`)
-3. If signing secrets exist: `assembleRelease` + `bundleRelease` → `word-aura-release`
-4. On tags starting with `word-aura-v`, the APK/AAB are attached to a GitHub release
+1. `npm run validate` (content gate), `npm test`, `npm run build`
+2. Provision the signing key — repository secrets if present, otherwise a freshly minted one
+3. `assembleDebug`, `assembleRelease`, `bundleRelease`
+4. `apksigner verify --print-certs` plus SHA-256 checksums in the job summary
+5. Force-push the APK/AAB to `word-aura-builds` so the latest installable build is always
+   fetchable over git, and upload it as a workflow artifact
+6. On tags starting with `word-aura-v`, attach the same files to a GitHub release
 
 Signing is entirely environment-driven, so no keystore is committed. Add these repository
 secrets to ship a signed build:
