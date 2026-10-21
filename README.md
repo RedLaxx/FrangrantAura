@@ -8,6 +8,21 @@ Built with **Next.js 15 (App Router)**, **TypeScript** and **Tailwind CSS**.
 
 ---
 
+## Word Aura — the Android word game
+
+Alongside the shop, this repository now holds **Word Aura**, a word puzzle for Android
+(`word-aura/`) where every completed level explains the words you just played — definitions,
+parts of speech and example sentences, collected in a searchable Word Book.
+
+```bash
+cd word-aura && npm install && npm run dev   # playable in a browser
+```
+
+Full details, content format and the signed-APK GitHub Actions pipeline are in
+[`word-aura/README.md`](word-aura/README.md).
+
+---
+
 ## Quick start
 
 ```bash
