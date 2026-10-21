@@ -69,8 +69,8 @@ export function WisdomScreen({
             </div>
             <h2>Here is what you just played.</h2>
             <p className="wisdom-lede">
-              {level.required.length} words, explained. Everything below is now saved in your Word
-              Book, so you can come back to it whenever you like.
+              {level.required.length} words, explained. Words you found have been added to your
+              Word Book; the ones you missed stay hidden there until you find them.
             </p>
             <div className="reward-pill">
               <CoinIcon size={15} /> +{coins} coins
@@ -81,8 +81,8 @@ export function WisdomScreen({
             <p className="eyebrow">Words from this level</p>
             <h2>Words you have met before.</h2>
             <p className="wisdom-lede">
-              Read them again, or hear them spoken. Your Word Book keeps every word you have
-              unlocked.
+              Read them again, or hear them spoken. Only the words you actually found are kept in
+              your Word Book.
             </p>
           </section>
         )}

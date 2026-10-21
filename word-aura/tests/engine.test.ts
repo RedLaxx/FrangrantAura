@@ -92,7 +92,9 @@ test("stars reward solving without hints and hunting bonus words", () => {
   assert.equal(starsFor({ hints: 0, bonusFound: 5, bonusTotal: 10 }), 3);
   assert.equal(starsFor({ hints: 0, bonusFound: 0, bonusTotal: 10 }), 2);
   assert.equal(starsFor({ hints: 1, bonusFound: 9, bonusTotal: 10 }), 1);
-  assert.equal(starsFor({ hints: 0, bonusFound: 0, bonusTotal: 0 }), 2);
+  // A level with no bonus words cannot be improved on, so clearing it hint-free
+  // is already worth three stars.
+  assert.equal(starsFor({ hints: 0, bonusFound: 0, bonusTotal: 0 }), 3);
   assert.equal(completionCoins(3), 30);
 });
 
@@ -101,7 +103,10 @@ test("a corrupt save is repaired instead of locking the player out", () => {
   const repaired = parseSave(
     JSON.stringify({
       coins: -50,
-      levels: { x: { found: "nope", stars: 99, revealed: { tea: 2, bad: -3 } } },
+      levels: {
+        x: { found: "nope", stars: 99, revealed: { tea: 2, bad: -3 } },
+        y: { found: ["sea"] },
+      },
       learned: { tea: "later", sea: 123 },
       settings: { sound: "yes" },
     }),
@@ -110,8 +115,12 @@ test("a corrupt save is repaired instead of locking the player out", () => {
   assert.equal(repaired.levels.x.stars, 3);
   assert.deepEqual(repaired.levels.x.found, []);
   assert.deepEqual(repaired.levels.x.revealed, { tea: 2 });
+  // Only words the player actually spelled on a level stay in the Word Book.
   assert.deepEqual(Object.keys(repaired.learned), ["sea"]);
   assert.equal(repaired.settings.sound, true);
+
+  const purged = parseSave(JSON.stringify({ learned: { sugar: 1, coast: 2 } }));
+  assert.deepEqual(purged.learned, {});
 });
 
 test("levels unlock in order across pack boundaries", () => {

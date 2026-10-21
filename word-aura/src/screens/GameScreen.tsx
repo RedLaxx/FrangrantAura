@@ -117,9 +117,6 @@ export function GameScreen({ level, state, update, onExit, onFinished, onReview 
       saved.completedAt = Date.now();
       draft.levels[level.id] = saved;
       draft.coins += coins;
-      for (const word of [...level.required, ...saved.bonus]) {
-        if (draft.learned[word] === undefined) draft.learned[word] = Date.now();
-      }
     });
 
     sfx.win();

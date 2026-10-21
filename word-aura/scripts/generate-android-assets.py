@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parent.parent / "android/app/src/main/res"
 ACCENT = (75, 68, 214, 255)
 SPARK = (207, 202, 255, 255)
-BG = (245, 244, 240, 255)
+BG = (16, 16, 20, 255)
 SS = 4
 
 DENSITIES = {

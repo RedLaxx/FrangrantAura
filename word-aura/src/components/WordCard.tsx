@@ -46,7 +46,9 @@ export function WordCard({ word, badge, compact = false }: WordCardProps) {
         </button>
       </div>
       <p className="word-card-def">{definition.definition}</p>
-      {compact ? null : <p className="word-card-example">“{definition.example}”</p>}
+      {!compact && definition.example ? (
+        <p className="word-card-example">“{definition.example}”</p>
+      ) : null}
     </article>
   );
 }

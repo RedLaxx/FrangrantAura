@@ -39,12 +39,15 @@ npm run dev        # http://localhost:5175
 - **Bonus words.** Any other dictionary word that can be spelled from the same letters counts as
   a bonus word: **+5 coins** each, and it appears in the teaching panel at the end.
 - **Hints** cost **30 coins** and reveal one letter of the word that needs the most help.
-- **Stars.** 3 stars = no hints and at least half the bonus words; 2 = no hints; otherwise 1.
-  Clearing a level pays `15 + 5 × stars`.
+- **Stars.** 3 stars = no hints and at least three bonus words (or every bonus word, on a level
+  that has fewer); 2 = no hints; otherwise 1. Clearing a level pays `15 + 5 × stars`.
 - **Unlocking.** Levels open in order, across pack boundaries. Beating one opens the next and its
   words are explained before you move on.
 - **Progress** lives in `localStorage` and is repaired on read, so a half-written save can never
-  lock a player out.
+  lock a player out. The Word Book only ever lists words the player has actually spelled — no
+  spoilers from words that were missed.
+- **Dark by default.** Every surface, the wheel, the Android status bar and the splash screen use
+  the night palette (`#101014` background, lavender accent).
 
 ## Content model
 
@@ -177,7 +180,7 @@ git tag word-aura-v1.0.0 && git push origin word-aura-v1.0.0
 ```
 src/
   game/
-    definitions/   curated word → definition data (4 files, ~1,000 words)
+    definitions/   word → definition data (17 files, ~6,700 words)
     dictionary.ts  parser + index, reports malformed lines instead of crashing
     levels.ts      packs and levels, play order, unlocking helpers
     engine.ts      letter matching, attempt classification, bonus words, stars
@@ -193,7 +196,8 @@ tests/                   engine, save and jsdom UI tests
 ```
 
 Sound effects are synthesised with the Web Audio API, so there are no audio assets, and the whole
-web bundle is ~120 kB gzipped. The game is fully offline: no network calls at runtime.
+web bundle is ~210 kB gzipped (most of it the word book). The game is fully offline: no network
+calls at runtime.
 
 ---
 

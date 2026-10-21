@@ -48,7 +48,7 @@ export function WordBookScreen({ state, onBack }: WordBookScreenProps) {
           <BackIcon />
         </button>
         <div className="topbar-titles">
-          <span className="topbar-eyebrow">Everything you have learned</span>
+          <span className="topbar-eyebrow">Words you have found</span>
           <h1 className="topbar-title">Word Book</h1>
         </div>
         <span className="count-pill">{total}</span>
@@ -62,8 +62,8 @@ export function WordBookScreen({ state, onBack }: WordBookScreenProps) {
             </span>
             <h2>Your book is still empty</h2>
             <p>
-              Finish your first level and every word from it lands here, with its meaning and an
-              example sentence. The words are yours to keep.
+              Every word you spell lands here with its meaning. Words you have not found yet stay
+              hidden, so the book is a record of what you have really played.
             </p>
             <button type="button" className="btn btn-primary" onClick={onBack}>
               Back to the game

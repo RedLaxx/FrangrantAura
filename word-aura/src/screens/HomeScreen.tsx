@@ -85,7 +85,7 @@ export function HomeScreen({
             {cleared}/{ALL_LEVELS.length} levels cleared
           </span>
           <span className="dot" aria-hidden="true" />
-          <span>{learned} words learned</span>
+          <span>{learned} words in the book</span>
         </div>
       </section>
 
@@ -96,7 +96,7 @@ export function HomeScreen({
         </div>
         <div className="stat">
           <span className="stat-value">{learned}</span>
-          <span className="stat-label">Words learned</span>
+          <span className="stat-label">Words found</span>
         </div>
         <div className="stat">
           <span className="stat-value stat-value-icon">
@@ -212,8 +212,8 @@ export function HomeScreen({
         </button>
         <p className="foot-note">
           {learned > 0
-            ? `${learned} words are already in your Word Book.`
-            : "Your Word Book fills up as you play."}
+            ? `${learned} found words are already in your Word Book.`
+            : "Words you spell are kept in your Word Book."}
         </p>
       </footer>
     </div>

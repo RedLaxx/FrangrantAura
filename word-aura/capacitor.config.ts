@@ -4,10 +4,10 @@ const config: CapacitorConfig = {
   appId: "com.wordaura.game",
   appName: "Word Aura",
   webDir: "dist",
-  backgroundColor: "#f5f4f0",
+  backgroundColor: "#101014",
   android: {
     allowMixedContent: false,
-    backgroundColor: "#f5f4f0",
+    backgroundColor: "#101014",
   },
 };
 

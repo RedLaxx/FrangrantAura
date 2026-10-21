@@ -137,14 +137,18 @@ export function isLevelComplete(level: Level, foundWords: ReadonlySet<string>): 
   return level.required.every((word) => foundWords.has(word));
 }
 
+/** Bonus words needed for the third star — a fixed target, because a level
+ * with a big dictionary can hide dozens of them. */
+export const BONUS_WORDS_FOR_THREE_STARS = 3;
+
 export function starsFor(options: {
   hints: number;
   bonusFound: number;
   bonusTotal: number;
 }): 1 | 2 | 3 {
   const { hints, bonusFound, bonusTotal } = options;
-  const halfTheBonus = bonusTotal > 0 && bonusFound >= Math.ceil(bonusTotal / 2);
-  if (hints === 0 && halfTheBonus) return 3;
+  const target = Math.min(BONUS_WORDS_FOR_THREE_STARS, bonusTotal);
+  if (hints === 0 && bonusFound >= target) return 3;
   if (hints === 0) return 2;
   return 1;
 }

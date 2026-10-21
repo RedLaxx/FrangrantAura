@@ -84,8 +84,8 @@ export function PackScreen({ pack, state, onBack, onPlay, onOpenBook }: PackScre
         </div>
 
         <p className="pack-note">
-          Finish a level and its words are explained before the next one unlocks — every word,
-          whether you found it or not.
+          Finish a level and its words are explained before the next one unlocks. Only the words
+          you found are added to your Word Book.
         </p>
       </main>
     </div>

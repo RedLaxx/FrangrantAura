@@ -137,6 +137,18 @@ export function parseSave(raw: string | null): SaveState {
     }
   }
 
+  // Older saves recorded every word from a finished level, including the ones
+  // the player never found. The Word Book only shows words the player has
+  // actually spelled, so anything not in a level's found/bonus list goes.
+  const foundWords = new Set<string>();
+  for (const level of Object.values(levels)) {
+    for (const word of level.found) foundWords.add(word);
+    for (const word of level.bonus) foundWords.add(word);
+  }
+  for (const word of Object.keys(learned)) {
+    if (!foundWords.has(word)) delete learned[word];
+  }
+
   const settings = isRecord(parsed.settings) ? parsed.settings : {};
 
   return {
