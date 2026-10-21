@@ -127,6 +127,7 @@ jobs:
           BUILD_SHA: ${{ github.sha }}
           BUILD_REF: ${{ github.ref_name }}
           KEY_ORIGIN: ${{ steps.signing.outputs.keystore_origin }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           rm -rf "$RUNNER_TEMP/publish" && mkdir -p "$RUNNER_TEMP/publish"
@@ -159,8 +160,6 @@ jobs:
           git push --force \
             "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
             word-aura-builds
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/upload-artifact@v4
         with:
